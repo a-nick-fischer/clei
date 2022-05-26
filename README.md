@@ -5,7 +5,7 @@
 ---
 
 <p align="center">
-<b>A versatile dead-simple API gateway written in Elixir!</b>
+<b>A versatile and lightweight API gateway written in Elixir!</b>
 </p>
 
 ## Example Config
