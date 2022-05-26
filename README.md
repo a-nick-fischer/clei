@@ -1,3 +1,36 @@
-# Clei
+<p align="center">
+  <img src="assets/logo.png" width=200>
+</p>
 
-The Clei API gateway.
+---
+
+<p align="center">
+<b>A versatile dead-simple API gateway written in Elixir!</b>
+</p>
+
+## Example Config
+
+```elixir
+config :clei,
+  server: %{port: 80},
+
+  routes: %{
+    :logging => [
+      {Plug.Logger, []}
+    ],
+
+    ~s|prefix.("/api") and get.() and json.()| => [
+      :logging,
+      {FixedResponse, [content: "Hello, World!"]}
+    ],
+
+    ~s|true| => [
+      :logging,
+      {FixedResponse, [content: "Not Found", status: 404]}
+    ]
+  }
+```
+(Yes, we're not proxying in this example - WIP)
+
+## Do we need another API gateway?
+No, probably we don't. Is it a great opportunity to learn and improve my Elixir skills? Definitely😃.
