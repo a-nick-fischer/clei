@@ -16,6 +16,6 @@ config :clei,
     ],
     ~s|true| => [
       :default,
-      {FixedResponse, [content: "Not Found", status: 404]}
+      {FixedResponse, [content: "Not F111", status: 404]}
     ]
   }
