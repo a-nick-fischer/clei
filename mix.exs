@@ -20,16 +20,22 @@ defmodule Clei.MixProject do
   end
 
   defp deps do
-    plugins() ++
+    external_plugins() ++
+    local_plugins() ++
       [
         {:plug_cowboy, "~> 2.5"},
         {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
       ]
   end
 
-  def plugins do
+  def local_plugins do
     Path.wildcard("plugins/*")
     |> Enum.map(fn dir -> {Path.basename(dir) |> String.to_atom(), path: dir} end)
+  end
+
+  def external_plugins do
+    {deps, _} = Code.eval_file("plugins.exs")
+    deps
   end
 
   def releases do
