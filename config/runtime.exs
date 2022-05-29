@@ -1,6 +1,5 @@
 import Config
-
-# Just an example config used for testing - will be moved to an example section later
+alias Clei.BuiltinPlugs, as: C
 
 config :clei,
   server: %{
@@ -9,6 +8,6 @@ config :clei,
   routes: %{
     ~s|true| => [
       {Plug.Logger, []},
-      {FixedResponse, [content: "Not Found!", status: 404]}
+      {C.FixedResponse, [content: "Not Found", status: 404]}
     ]
   }
