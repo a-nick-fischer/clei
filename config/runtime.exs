@@ -7,15 +7,8 @@ config :clei,
     port: 80
   },
   routes: %{
-    :default => [
-      {Plug.Logger, []}
-    ],
-    ~s|prefix.("/api") and get.() and json.()| => [
-      :default,
-      {FixedResponse, [content: "Hello, World!"]}
-    ],
     ~s|true| => [
-      :default,
-      {FixedResponse, [content: "Not F111", status: 404]}
+      {Plug.Logger, []},
+      {FixedResponse, [content: "Not Found!", status: 404]}
     ]
   }
