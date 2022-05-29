@@ -1,4 +1,4 @@
-defmodule Debug do
+defmodule Clei.BuiltinPlugs.Debug do
   @moduledoc """
   Logs the internal representation of current connection. For debug
   purposes only.

@@ -1,4 +1,4 @@
-defmodule RewritePath do
+defmodule Clei.BuiltinPlugs.RewritePath do
   @moduledoc """
   Rewrites the request path based on a regex.
   """

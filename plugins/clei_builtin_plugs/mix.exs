@@ -3,7 +3,7 @@ defmodule Clei.Builtin.MixProject do
 
   def project do
     [
-      app: :clei_builtin,
+      app: :clei_builtin_plugs,
       version: "0.1.0",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,

@@ -1,4 +1,4 @@
-defmodule FixedResponse do
+defmodule Clei.BuiltinPlugs.FixedResponse do
   @moduledoc """
   Returns a fixed response.
   """
