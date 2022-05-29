@@ -28,7 +28,7 @@ COPY --from=compressor /app /app
 COPY --from=builder /app/VERSION /app/VERSION
 
 # Create a softlink for the configuration
-RUN ln -s /app/releases/$(cat /app/VERSION)/runtime.exs /config.exs && \
+RUN ln -s "/app/releases/$(cat /app/VERSION)/runtime.exs" /config.exs && \
     apk add --no-cache \
         ncurses-libs \
         zlib \
