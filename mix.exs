@@ -8,7 +8,8 @@ defmodule Clei.MixProject do
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      releases: releases()
+      releases: releases(),
+      aliases: aliases()
     ]
   end
 
@@ -44,6 +45,18 @@ defmodule Clei.MixProject do
         include_executables_for: [:unix],
         applications: [clei: :permanent]
       ]
+    ]
+  end
+
+  def aliases do
+    [
+      fullbuild: [
+        "local.hex --if-missing --force",
+        "local.rebar --if-missing --force",
+        "deps.get",
+        "deps.compile",
+        "release"
+      ]        
     ]
   end
 end
