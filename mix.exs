@@ -22,7 +22,7 @@ defmodule Clei.MixProject do
 
   defp deps do
     external_plugins() ++
-    local_plugins() ++
+      local_plugins() ++
       [
         {:plug_cowboy, "~> 2.5"},
         {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
@@ -50,13 +50,12 @@ defmodule Clei.MixProject do
 
   def aliases do
     [
-      fullbuild: [
+      setup: [
         "local.hex --if-missing --force",
         "local.rebar --if-missing --force",
         "deps.get",
-        "deps.compile",
-        "release"
-      ]        
+        "deps.compile"
+      ]
     ]
   end
 end

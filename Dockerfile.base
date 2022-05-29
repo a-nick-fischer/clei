@@ -5,7 +5,7 @@ ADD . /app
 WORKDIR /app
 ENV MIX_ENV=prod
 
-RUN mix fullbuild
+RUN mix setup && mix release
 
 # Compressor stage for compressing the bundled erlang runtime
 # You may call it premature optimization, I call it "a few MB less" :P
@@ -18,6 +18,8 @@ RUN apk add upx && \
 
 # Final destination image
 FROM alpine:3.15.4
+
+LABEL maintainer="Nick Fischer <nick.korotkin@outlook.com>"
 
 COPY --from=compressor /app /app
 COPY --from=builder /app/VERSION /app/VERSION
