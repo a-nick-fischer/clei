@@ -8,6 +8,6 @@ config :clei,
   routes: %{
     ~s|true| => [
       {Plug.Logger, []},
-      {C.FixedResponse, [content: "Not Found", status: 404]},
+      {C.FixedResponse, content: "Not Found", status: 404}
     ]
   }
