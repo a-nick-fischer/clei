@@ -21,12 +21,12 @@ config :clei,
 
     ~s|prefix.("/api") and get.() and json.()| => [
       :logging,
-      {FixedResponse, [content: "Hello, World!"]}
+      {C.FixedResponse, [content: "Hello, World!"]}
     ],
 
     ~s|true| => [
       :logging,
-      {FixedResponse, [content: "Not Found", status: 404]}
+      {C.FixedResponse, [content: "Not Found", status: 404]}
     ]
   }
 ```
