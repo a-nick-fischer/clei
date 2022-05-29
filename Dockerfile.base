@@ -5,12 +5,7 @@ ADD . /app
 WORKDIR /app
 ENV MIX_ENV=prod
 
-RUN mix do \
-        local.hex --if-missing --force, \
-        local.rebar --if-missing --force, \
-        deps.get, \
-        deps.compile, \
-        release
+RUN mix fullbuild
 
 # Compressor stage for compressing the bundled erlang runtime
 # You may call it premature optimization, I call it "a few MB less" :P
