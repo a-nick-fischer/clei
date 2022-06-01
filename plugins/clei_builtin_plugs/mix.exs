@@ -14,7 +14,8 @@ defmodule Clei.Builtin.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Clei.BuiltinPlugs.Application, []}
     ]
   end
 
@@ -23,6 +24,7 @@ defmodule Clei.Builtin.MixProject do
     [
       # https://github.com/potatosalad/erlang-jose
       {:plug, "~> 1.13"},
+      {:finch, "~> 0.12"},
       {:clei_core, path: "../clei_core"}
     ]
   end
