@@ -21,7 +21,7 @@ config :clei,
 
     ~s|prefix.("/api") and get.() and json.()| => [
       :logging,
-      {C.FixedResponse, content: "Hello, World!"}
+      {C.HTTPProxy, upstream: "http://example.com"}
     ],
 
     ~s|true| => [
@@ -30,7 +30,6 @@ config :clei,
     ]
   }
 ```
-(Yes, we're not proxying in this example - WIP)
 
 ## Do we need another API gateway?
 No, probably we don't. Is it a great opportunity to learn and improve my Elixir skills? Definitely😃.
