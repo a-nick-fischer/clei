@@ -27,7 +27,6 @@ jobs:
       - name: Build builder image
         uses: docker/build-push-action@v3
         with:
-          context: .
           load: true
           file: Dockerfile.builder
           tags: ${{ env.BUILDER_IMAGE_NAME }}
@@ -35,7 +34,6 @@ jobs:
       - name: Build base image
         uses: docker/build-push-action@v3
         with:
-          context: .
           load: true
           file: Dockerfile.base
           tags: ${{ env.BASE_IMAGE_NAME }}
@@ -53,7 +51,6 @@ jobs:
       - name: Push builder image
         uses: docker/build-push-action@v3
         with:
-          context: .
           push: true
           file: Dockerfile.builder
           tags: ${{ env.BUILDER_IMAGE_NAME }}
@@ -61,7 +58,6 @@ jobs:
       - name: Push base image
         uses: docker/build-push-action@v3
         with:
-          context: .
           push: true
           file: Dockerfile.base
           tags: ${{ env.BASE_IMAGE_NAME }}
