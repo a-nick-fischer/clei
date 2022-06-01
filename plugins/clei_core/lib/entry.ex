@@ -22,8 +22,13 @@ defmodule Clei.Core.Entry do
     response = Route.call(route, conn)
 
     case response do
-      %Plug.Conn{state: :unset} -> error_resp(conn, :internal_server_error)
-      _ -> response
+      %Plug.Conn{state: :unset} ->
+        Logger.warn("Route did not produce a sendable response: #{inspect(response)}")
+        error_resp(conn, :internal_server_error)
+      %Plug.Conn{} -> response
+      _ ->
+        Logger.warn("Route produced invalid result: #{inspect(response)}")
+        error_resp(conn, :internal_server_error)
     end
   end
 
