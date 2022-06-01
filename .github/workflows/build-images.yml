@@ -3,6 +3,10 @@ name: Build and Push Docker Images
 on:
   workflow_dispatch: # May change to 'push' later..
 
+env:
+  BUILDER_IMAGE_NAME: "anickfischer/clei:latest-builder"
+  BASE_IMAGE_NAME: "anickfischer/clei:latest"
+
 jobs:
   # Based on https://github.com/marketplace/actions/build-and-push-docker-images
   docker:
@@ -20,16 +24,44 @@ jobs:
           username: anickfischer
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Build and push builder image
+      - name: Build builder image
         uses: docker/build-push-action@v3
         with:
+          context: .
+          load: true
+          file: Dockerfile.builder
+          tags: ${{ env.BUILDER_IMAGE_NAME }}
+
+      - name: Build base image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          load: true
+          file: Dockerfile.base
+          tags: ${{ env.BASE_IMAGE_NAME }}
+
+      - name: Scan builder image
+        uses: azure/container-scan@v0
+        with:
+          image-name: ${{ env.BUILDER_IMAGE_NAME }}
+
+      - name: Scan base image
+        uses: azure/container-scan@v0
+        with:
+          image-name: ${{ env.BASE_IMAGE_NAME }}
+
+      - name: Push builder image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
           push: true
           file: Dockerfile.builder
-          tags: "anickfischer/clei:latest-builder"
+          tags: ${{ env.BUILDER_IMAGE_NAME }}
 
-      - name: Build and push base image
+      - name: Push base image
         uses: docker/build-push-action@v3
         with:
+          context: .
           push: true
           file: Dockerfile.base
-          tags: "anickfischer/clei:latest"
+          tags: ${{ env.BASE_IMAGE_NAME }}
