@@ -12,12 +12,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+      - name: Checkout repo
+        uses: actions/checkout@master
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -25,18 +22,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
       - name: Build builder image
-        uses: docker/build-push-action@v3
-        with:
-          load: true
-          file: Dockerfile.builder
-          tags: ${{ env.BUILDER_IMAGE_NAME }}
+        run: docker build -t ${{ env.BUILDER_IMAGE_NAME }} -f Dockerfile.builder .
 
       - name: Build base image
-        uses: docker/build-push-action@v3
-        with:
-          load: true
-          file: Dockerfile.base
-          tags: ${{ env.BASE_IMAGE_NAME }}
+        run: docker build -t ${{ env.BASE_IMAGE_NAME }} -f Dockerfile.base .
 
       - name: Scan builder image
         uses: azure/container-scan@v0.1
@@ -49,15 +38,7 @@ jobs:
           image-name: ${{ env.BASE_IMAGE_NAME }}
 
       - name: Push builder image
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          file: Dockerfile.builder
-          tags: ${{ env.BUILDER_IMAGE_NAME }}
+        run: docker push ${{ env.BUILDER_IMAGE_NAME }}
 
       - name: Push base image
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          file: Dockerfile.base
-          tags: ${{ env.BASE_IMAGE_NAME }}
+        run: docker push ${{ env.BASE_IMAGE_NAME }}
