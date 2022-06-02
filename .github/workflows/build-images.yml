@@ -24,38 +24,14 @@ jobs:
           username: anickfischer
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Build builder image
-        uses: docker/build-push-action@v3
-        with:
-          load: true
-          file: Dockerfile.builder
-          tags: ${{ env.BUILDER_IMAGE_NAME }}
-
-      - name: Build base image
-        uses: docker/build-push-action@v3
-        with:
-          load: true
-          file: Dockerfile.base
-          tags: ${{ env.BASE_IMAGE_NAME }}
-
-      - name: Scan builder image
-        uses: azure/container-scan@v0.1
-        with:
-          image-name: ${{ env.BUILDER_IMAGE_NAME }}
-
-      - name: Scan base image
-        uses: azure/container-scan@v0.1
-        with:
-          image-name: ${{ env.BASE_IMAGE_NAME }}
-
-      - name: Push builder image
+      - name: Build and push builder image
         uses: docker/build-push-action@v3
         with:
           push: true
           file: Dockerfile.builder
           tags: ${{ env.BUILDER_IMAGE_NAME }}
 
-      - name: Push base image
+      - name: Build and push base image
         uses: docker/build-push-action@v3
         with:
           push: true
