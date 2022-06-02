@@ -39,12 +39,12 @@ jobs:
           tags: ${{ env.BASE_IMAGE_NAME }}
 
       - name: Scan builder image
-        uses: azure/container-scan@v0
+        uses: azure/container-scan@v0.1
         with:
           image-name: ${{ env.BUILDER_IMAGE_NAME }}
 
       - name: Scan base image
-        uses: azure/container-scan@v0
+        uses: azure/container-scan@v0.1
         with:
           image-name: ${{ env.BASE_IMAGE_NAME }}
 
