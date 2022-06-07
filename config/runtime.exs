@@ -2,9 +2,6 @@ import Config
 alias Clei.BuiltinPlugs, as: C
 
 config :clei,
-  server: %{
-    port: 80
-  },
   routes: %{
     ~s|true| => [
       {Plug.Logger, []},
