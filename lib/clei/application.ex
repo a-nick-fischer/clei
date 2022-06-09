@@ -8,7 +8,7 @@ defmodule Clei.Application do
   alias Clei.Core.Certificate
   alias Clei.Core.Entry
 
-  @extra_keys [:http_port, :https_port]
+  @extra_keys [:http_port, :https_port, :domains]
 
   @impl true
   def start(_type, _args) do
@@ -37,17 +37,20 @@ defmodule Clei.Application do
   defp https_cowboy_opts do
     opts = Application.fetch_env!(:clei, :server)
     port = Map.fetch!(opts, :https_port)
+    domains = Map.fetch!(opts, :domains)
 
     tls_key_given = Map.has_key?(opts, :keyfile) or Map.has_key?(opts, :key)
-    opts = if tls_key_given do
-      opts
-    else
-      {key, cert} = Certificate.self_signed(["localhost"]) |> Certificate.to_der()
 
-      opts
-      |> Map.put(:key, {:ECPrivateKey, key})
-      |> Map.put(:cert, cert)
-    end
+    opts =
+      if tls_key_given do
+        opts
+      else
+        {key, cert} = Certificate.self_signed(domains) |> Certificate.to_der()
+
+        opts
+        |> Map.put(:key, key)
+        |> Map.put(:cert, cert)
+      end
 
     opts
     |> Map.put(:port, port)
