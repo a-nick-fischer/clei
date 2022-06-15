@@ -6,6 +6,7 @@ defmodule Clei.Core.RouteCache do
   FastGlobal library to optimize reads, at the cost of very expensive writes.
   """
 
+  alias Clei.Core.Matcher
   alias Clei.Core.Route
   @key_name :routes
 
@@ -20,10 +21,10 @@ defmodule Clei.Core.RouteCache do
 
   defp put(routes), do: FastGlobal.put(:routes, routes)
 
-  defp preprocess_route({matcher, handlers}, routes) when not is_atom(matcher) do
+  defp preprocess_route({matcher_str, handlers}, routes) when not is_atom(matcher_str) do
     [
       %Route{
-        matcher: matcher,
+        matcher: matcher_str |> Code.string_to_quoted!() |> Macro.expand(Matcher.env()),
         handlers: Enum.flat_map(handlers, &preprocess_handler(&1, routes))
       }
     ]

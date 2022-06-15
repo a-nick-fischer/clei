@@ -7,19 +7,18 @@ defmodule Clei.Core.Matcher do
   alias Clei.Core.Route
 
   def route_matches?(%Route{matcher: matcher}, conn) do
-    bindings =
-      Keyword.merge(
-        connection_vars(conn),
-        helper_funcs(conn)
-      )
-
-    {result, _} = Code.eval_string(matcher, bindings, __ENV__)
+    {result, _} = Code.eval_quoted(matcher, bindings(conn), env())
 
     result
   end
 
-  defp connection_vars(%Plug.Conn{remote_ip: {a, b, c, d}} = conn) do
+  def env do
+    __ENV__
+  end
+
+  def bindings(%Plug.Conn{remote_ip: {a, b, c, d}} = conn) do
     [
+      conn: conn,
       host: conn.host,
       method: conn.method,
       path: conn.request_path,
@@ -30,51 +29,105 @@ defmodule Clei.Core.Matcher do
     ]
   end
 
-  defp helper_funcs(conn) do
-    [
-      json: fn ->
-        Plug.Conn.get_req_header(conn, "content-type") === ["application/json"]
-      end,
-      xml: fn ->
-        type = Plug.Conn.get_req_header(conn, "content-type")
-        type === ["application/xml"] or type === ["text/xml"]
-      end,
-      get: fn ->
-        conn.method === "GET"
-      end,
-      post: fn ->
-        conn.method === "POST"
-      end,
-      patch: fn ->
-        conn.method === "PATCH"
-      end,
-      put: fn ->
-        conn.method === "PUT"
-      end,
-      delete: fn ->
-        conn.method === "DELETE"
-      end,
-      head: fn ->
-        conn.method === "HEAD"
-      end,
-      tls: fn ->
-        conn.scheme === "https"
-      end,
-      prefix: fn path_prefix ->
-        String.starts_with?(conn.request_path, path_prefix)
-      end,
-      header: fn header ->
-        Plug.Conn.get_req_header(conn, header)
-      end,
-      query_param: fn param ->
-        Plug.Conn.fetch_query_params(conn).query_params[param]
-      end,
-      cookie: fn cookie ->
-        Plug.Conn.fetch_cookies(conn).req_cookies[cookie]
-      end,
-      http_version: fn ->
-        Plug.Conn.get_http_protocol(conn)
-      end
-    ]
+  defmacro json do
+    quote do
+      Plug.Conn.get_req_header(var!(conn), "content-type") === ["application/json"]
+    end
+  end
+
+  defmacro xml do
+    quote do
+      type = Plug.Conn.get_req_header(var!(conn), "content-type")
+      type === ["application/xml"] or type === ["text/xml"]
+    end
+  end
+
+  defmacro check_path_and_method(nil, method) do
+    quote do
+      var!(conn).method === unquote(method)
+    end
+  end
+
+  defmacro check_path_and_method(path, method) do
+    pattern =
+      path
+      |> Regex.escape()
+      |> String.replace("\\*\\*", ".*")
+      |> String.replace("\\*", "[^/]*")
+      |> Regex.compile!()
+      |> Macro.escape()
+
+    quote do
+      IO.inspect(unquote(pattern))
+
+      Regex.match?(unquote(pattern), var!(conn).request_path) and
+        var!(conn).method === unquote(method)
+    end
+  end
+
+  defmacro get(path \\ nil) do
+    quote do
+      check_path_and_method(unquote(path), "GET")
+    end
+  end
+
+  defmacro post(path \\ nil) do
+    quote do
+      check_path_and_method(unquote(path), "POST")
+    end
+  end
+
+  defmacro patch(path \\ nil) do
+    quote do
+      check_path_and_method(unquote(path), "PATCH")
+    end
+  end
+
+  defmacro put(path \\ nil) do
+    quote do
+      check_path_and_method(unquote(path), "PUT")
+    end
+  end
+
+  defmacro delete(path \\ nil) do
+    quote do
+      check_path_and_method(unquote(path), "DELETE")
+    end
+  end
+
+  defmacro head(path \\ nil) do
+    quote do
+      check_path_and_method(unquote(path), "HEAD")
+    end
+  end
+
+  defmacro tls do
+    quote do
+      var!(conn).scheme === :https
+    end
+  end
+
+  defmacro prefix(path_prefix) do
+    quote do
+      String.starts_with?(var!(conn).request_path, unquote(path_prefix))
+    end
+  end
+
+  defmacro header(header) do
+    quote do
+      Plug.Conn.get_req_header(var!(conn), unquote(header))
+    end
+  end
+
+  defmacro query_param(param) do
+    quote do
+      Plug.Conn.fetch_query_params(var!(conn)).query_params[unquote(param)]
+    end
+  end
+
+  defmacro cookie(cookie) do
+    quote do
+      Plug.Conn.fetch_cookies(var!(conn)).req_cookies[unquote(cookie)]
+    end
   end
 end

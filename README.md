@@ -28,7 +28,7 @@ config :clei,
       {Plug.Logger, []}
     ],
 
-    ~s|prefix.("/image") and get.()| => [
+    ~s|get("/image/*")| => [
       :logging,
       {C.HTTPProxy, upstream: "https://httpbin.org/"}
     ],
