@@ -28,10 +28,11 @@ defmodule Clei.Core.Certificate do
   end
 
   def to_der({priv_key, cert}) do
-    alg = case X509.Certificate.public_key(cert) do
-      {:RSAPublicKey, _, _} -> :RSAPrivateKey
-      {{:ECPoint, _}, _} -> :ECPrivateKey
-    end
+    alg =
+      case X509.Certificate.public_key(cert) do
+        {:RSAPublicKey, _, _} -> :RSAPrivateKey
+        {{:ECPoint, _}, _} -> :ECPrivateKey
+      end
 
     {
       {alg, X509.PrivateKey.to_der(priv_key)},
