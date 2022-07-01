@@ -33,10 +33,70 @@ defmodule Clei.BuiltinPlugs.HTTPProxy do
     Finch.build(
       conn.method,
       Keyword.get(opts, :upstream) <> conn.request_path,
-      conn.req_headers,
+      prepare_headers(conn.req_header),
       {:stream, create_body_input_stream(conn)}
     )
   end
+
+  # Partly copied from 
+  # https://github.com/tallarium/reverse_proxy_plug/blob/4d8bc8ef680744e979fdefb975b25ab282d1ccd1/lib/reverse_proxy_plug.ex#L267
+  defp prepare_headers(conn) do
+    headers
+    |> downcase_headers()
+    |> remove_hop_by_hop_headers()
+    |> add_forward_headers(conn)
+  end
+
+  defp downcase_headers(headers) do
+    Enum.map(headers, fn {header, value} -> { String.downcase(header), value } end)
+  end
+
+  defp remove_hop_by_hop_headers(headers) do
+    hop_by_hop_headers = [
+      "te",
+      "transfer-encoding",
+      "trailer",
+      "connection",
+      "keep-alive",
+      "proxy-authenticate",
+      "proxy-authorization",
+      "upgrade"
+    ]
+
+    Enum.reject(headers, fn {header, _} -> Enum.member?(hop_by_hop_headers, header) end)
+  end
+
+  defp add_forward_headers(conn) do
+    %Plug.Conn{
+      req_headers: req_headers, 
+      scheme: scheme, 
+      port_number: port,
+      remote_ip: remote_ip,
+      host: host
+    } = conn
+
+    headers = Enum.into(req_header, %{})
+
+    remote_ip_str = conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
+    protocol_str = Atom.to_string(scheme)
+    port_str = Integer.to_string(port)
+    protocol_version = conn 
+      |> Conn.get_http_protocol() 
+      |> Atom.to_string()
+    
+    # TODO: Add IPv6 support: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
+    forwarded_header = "for=#{remote_ip_str};host=#{host};proto=#{protocol_str}"
+    via_header = "#{protocol_version} clei"
+
+    headers
+    |> Map.update("via", via_header, fn previous -> "#{previous}, #{via_header}" end)
+    |> Map.update("forwarded", forwarded_header, fn previous -> "#{previous}, #{forwarded_header}" end)
+    |> Map.update("x-forwarded-for", remote_ip_str, fn previous -> "#{previous}, #{remote_ip_str}" end)
+    |> Map.put_new("x-forwarded-proto", protocol_str)
+    |> Map.put_new("x-forwarded-port", port_str)
+    |> Enum.into([])
+  end
+
 
   defp create_body_input_stream(conn) do
     Stream.unfold(read_body(conn), fn
