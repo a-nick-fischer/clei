@@ -33,15 +33,15 @@ defmodule Clei.BuiltinPlugs.HTTPProxy do
     Finch.build(
       conn.method,
       Keyword.get(opts, :upstream) <> conn.request_path,
-      prepare_headers(conn.req_header),
+      prepare_headers(conn),
       {:stream, create_body_input_stream(conn)}
     )
   end
 
-  # Partly copied from 
+  # Partly copied from
   # https://github.com/tallarium/reverse_proxy_plug/blob/4d8bc8ef680744e979fdefb975b25ab282d1ccd1/lib/reverse_proxy_plug.ex#L267
   defp prepare_headers(conn) do
-    headers
+    conn.req_headers
     |> downcase_headers()
     |> remove_hop_by_hop_headers()
     |> add_forward_headers(conn)
@@ -66,24 +66,23 @@ defmodule Clei.BuiltinPlugs.HTTPProxy do
     Enum.reject(headers, fn {header, _} -> Enum.member?(hop_by_hop_headers, header) end)
   end
 
-  defp add_forward_headers(conn) do
+  defp add_forward_headers(prev_headers, conn) do
     %Plug.Conn{
-      req_headers: req_headers, 
-      scheme: scheme, 
-      port_number: port,
+      scheme: scheme,
+      port: port,
       remote_ip: remote_ip,
       host: host
     } = conn
 
-    headers = Enum.into(req_header, %{})
 
-    remote_ip_str = conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
+    headers = Enum.into(prev_headers, %{})
+    remote_ip_str = remote_ip |> Tuple.to_list() |> Enum.join(".")
     protocol_str = Atom.to_string(scheme)
     port_str = Integer.to_string(port)
-    protocol_version = conn 
-      |> Conn.get_http_protocol() 
+    protocol_version = conn
+      |> get_http_protocol()
       |> Atom.to_string()
-    
+
     # TODO: Add IPv6 support: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Forwarded
     forwarded_header = "for=#{remote_ip_str};host=#{host};proto=#{protocol_str}"
     via_header = "#{protocol_version} clei"
