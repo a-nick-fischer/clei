@@ -9,7 +9,7 @@ RUN mix setup && mix release
 
 # Compressor stage for compressing the bundled erlang runtime
 # You may call it premature optimization, I call it "a few MB less" :P
-FROM alpine:3.17 as compressor
+FROM alpine:3.18.3 as compressor
 
 COPY --from=builder /app/_build/prod/rel/clei /app
 
@@ -17,7 +17,7 @@ RUN apk add upx && \
         upx --lzma --best /app/erts-*/bin/* || true
 
 # Final destination image
-FROM alpine:3.17
+FROM alpine:3.18.3
 
 LABEL maintainer="Nick Fischer <nick.korotkin@outlook.com>"
 
